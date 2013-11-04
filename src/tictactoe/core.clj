@@ -3,6 +3,7 @@
 (ns tictactoe.core
   (:gen-class))
 
+; Utility methods
 (defn repeatv [n to-repeat]
   (vec (repeat n to-repeat)))
 
@@ -26,17 +27,18 @@
 (defn is-valid? [board position]
   (= (get board position) "__"))
 
+(defn drawn? [board]
+  (not (some true? (mapv (partial is-valid? board) (range 0 9)))))
+
 (defn game-over? [board]
-  (or (winner board :x) (winner board :o) (not (some #{true} (mapv (partial is-valid? board) (range 0 9))))))
+  (or (winner board :x) (winner board :o) (drawn? board)))
 
 (defn get-move [board player]
   (let [move (read)]
     (if (is-valid? board move) (assoc board move player) false)))
 
 (defn next-player [player]
-  (if (= player :x)
-    :o
-    :x))
+  (if (= player :x) :o :x))
 
 (defn print-board [board]
   (println (mapv board [0 1 2]))
@@ -49,7 +51,7 @@
   (if-let [new-board (get-move board player)]
     (if (game-over? new-board)
       (if (winner new-board player)
-        (println "Winner!")
+        (do (print-board board) (println "Winner!"))
         (println "Tied!"))
       (recur new-board (next-player player)))
     (recur board player)))
